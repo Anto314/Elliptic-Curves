@@ -19,18 +19,23 @@ typedef struct
  */
 void PointCreate(unsigned int X, unsigned int Y, TPoint *Pointer_Output_Point);
 
-/** Check if two points X coordinate are equal.
+/** Delete a previously created point.
+ * @param Pointer_Point The point to delete.
+ */
+void PointDelete(TPoint *Pointer_Point);
+
+/** Check if two points are equal.
  * @param Pointer_Point_A First point.
  * @param Pointer_Point_B Second point.
- * @return 1 if the X coordinate are equal or 0 otherwise.
+ * @return 1 if they are equal or 0 otherwise.
  */
-int PointIsEqualX(TPoint *Pointer_Point_A, TPoint *Pointer_Point_B);
+int PointIsEqual(TPoint *Pointer_Point_A, TPoint *Pointer_Point_B);
 
 /** Copy a point into another point.
- * @param Pointer_Destination_Point Destination.
  * @param Pointer_Source_Point Source.
+ * @param Pointer_Destination_Point Destination.
  * @warning The two points must have been created by the user.
  */
-void PointCopy(TPoint *Pointer_Destination_Point, TPoint *Pointer_Source_Point);
+void PointCopy(TPoint *Pointer_Source_Point, TPoint *Pointer_Destination_Point);
 
 #endif

@@ -31,10 +31,11 @@ typedef struct
 void ECLoadFromFile(char *String_Path, TEllipticCurve *Pointer_Curve);
 
 /** Compute the opposite of a point.
+ * @param Pointer_Curve The elliptic curve.
  * @param Pointer_Input_Point The point to compute the opposite.
  * @param Pointer_Output_Point The computed opposite (the point must be created by the user).
  */
-void ECOpposite(TPoint *Pointer_Input_Point, TPoint *Pointer_Output_Point);
+void ECOpposite(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Input_Point, TPoint *Pointer_Output_Point);
 
 /** Add two points.
  * @param Pointer_Curve The elliptic curve used for addition.
