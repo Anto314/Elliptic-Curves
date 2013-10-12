@@ -114,12 +114,12 @@ static void ECAddDifferentPoints(TEllipticCurve *Pointer_Curve, TPoint *Pointer_
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Public functions
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
-void ECLoadFromFile(char *String_Path, TEllipticCurve *Pointer_Curve)
+int ECLoadFromFile(char *String_Path, TEllipticCurve *Pointer_Curve)
 {
 	FILE *File;
 	
 	File = fopen(String_Path, "r");
-	assert(File != NULL);
+	if (File == NULL) return 0;
 	
 	// Initialize curve members
 	mpz_init(Pointer_Curve->p);
@@ -134,6 +134,15 @@ void ECLoadFromFile(char *String_Path, TEllipticCurve *Pointer_Curve)
 	gmp_fscanf(File, "a6=%Zd", &Pointer_Curve->a6);
 	
 	fclose(File);
+	return 1;
+}
+
+void ECFree(TEllipticCurve *Pointer_Curve)
+{
+	mpz_clear(Pointer_Curve->p);
+	mpz_clear(Pointer_Curve->n);
+	mpz_clear(Pointer_Curve->a4);
+	mpz_clear(Pointer_Curve->a6);
 }
 
 void ECOpposite(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Input_Point, TPoint *Pointer_Output_Point)
@@ -177,7 +186,7 @@ void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *
 	{
 		// Result is infinite
 		Pointer_Output_Point->Is_Infinite = 1;
-		PointDelete(&Point_Temp);
+		PointFree(&Point_Temp);
 		#ifdef DEBUG
 			printf("[ECAddition] P = -Q\n");
 		#endif

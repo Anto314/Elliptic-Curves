@@ -19,10 +19,10 @@ typedef struct
  */
 void PointCreate(unsigned int X, unsigned int Y, TPoint *Pointer_Output_Point);
 
-/** Delete a previously created point.
+/** Free a previously created point.
  * @param Pointer_Point The point to delete.
  */
-void PointDelete(TPoint *Pointer_Point);
+void PointFree(TPoint *Pointer_Point);
 
 /** Check if two points are equal.
  * @param Pointer_Point_A First point.

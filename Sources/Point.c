@@ -12,7 +12,7 @@ void PointCreate(unsigned int X, unsigned int Y, TPoint *Pointer_Output_Point)
 	Pointer_Output_Point->Is_Infinite = 0;
 }
 
-void PointDelete(TPoint *Pointer_Point)
+void PointFree(TPoint *Pointer_Point)
 {
 	mpz_clear(Pointer_Point->X);
 	mpz_clear(Pointer_Point->Y);

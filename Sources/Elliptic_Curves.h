@@ -27,8 +27,14 @@ typedef struct
 /** Load an elliptic curve from a .gp file.
  * @param String_Path Path to the file.
  * @param Pointer_Curve Where to store the curve.
+ * @return 0 if the file was not found or 1 if the curve was successfully loaded.
  */
-void ECLoadFromFile(char *String_Path, TEllipticCurve *Pointer_Curve);
+int ECLoadFromFile(char *String_Path, TEllipticCurve *Pointer_Curve);
+
+/** Free a curve.
+ * @param Pointer_Curve The curve to destroy.
+ */
+void ECFree(TEllipticCurve *Pointer_Curve);
 
 /** Compute the opposite of a point.
  * @param Pointer_Curve The elliptic curve.

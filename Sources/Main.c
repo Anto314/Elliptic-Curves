@@ -13,7 +13,11 @@ static void Tests(void)
 	printf("--- TESTS ---\n");
 	
 	//ECLoadFromFile("w256-001.gp", &Curve);
-	ECLoadFromFile("test.gp", &Curve);
+	if (!ECLoadFromFile("test.gp", &Curve))
+	{
+		printf("Error : can't load curve file.\n");
+		return -1;
+	}
 	
 	PointCreate(3, 1, &A);
 	PointCreate(2, 4, &B);
