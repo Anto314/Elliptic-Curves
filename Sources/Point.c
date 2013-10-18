@@ -38,3 +38,9 @@ void PointCopy(TPoint *Pointer_Source_Point, TPoint *Pointer_Destination_Point)
 	mpz_set(Pointer_Destination_Point->Y, Pointer_Source_Point->Y);
 	Pointer_Destination_Point->Is_Infinite = Pointer_Source_Point->Is_Infinite;
 }
+
+void PointShow(TPoint *Pointer_Point)
+{
+	if (Pointer_Point->Is_Infinite) printf("Point is infinite.\n");
+	else gmp_printf("X = %Zd, Y = %Zd\n", Pointer_Point->X, Pointer_Point->Y);
+}

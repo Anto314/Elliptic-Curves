@@ -10,7 +10,7 @@ static void Tests(void)
 	TEllipticCurve Curve;
 	TPoint A, B, C;
 	
-	printf("--- TESTS ---\n");
+	
 	
 	//ECLoadFromFile("w256-001.gp", &Curve);
 	if (!ECLoadFromFile("test.gp", &Curve))
@@ -36,7 +36,8 @@ static void Tests(void)
 
 int main(void)
 {
-	Tests();
+	printf("--- TESTS ---\n");
 	
+	printf("Adding 2 distinct points : (expected value");
 	return 0;
 }

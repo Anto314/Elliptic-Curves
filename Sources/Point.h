@@ -38,4 +38,9 @@ int PointIsEqual(TPoint *Pointer_Point_A, TPoint *Pointer_Point_B);
  */
 void PointCopy(TPoint *Pointer_Source_Point, TPoint *Pointer_Destination_Point);
 
+/** Display the coordinates of a point.
+ * @param Pointer_Point The point to display.
+ */
+void PointShow(TPoint *Pointer_Point);
+
 #endif
