@@ -29,9 +29,9 @@ static void Tests(void)
 	// Test different points addition
 	ECAddition(&Curve, &A, &B, &C);
 	
-	PointDelete(&A);
+/*	PointDelete(&A);
 	PointDelete(&B);
-	PointDelete(&C);
+	PointDelete(&C);*/
 }
 
 int main(void)
