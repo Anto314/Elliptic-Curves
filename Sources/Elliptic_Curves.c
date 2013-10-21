@@ -31,7 +31,7 @@ static inline void ECAdd(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P,
 	
 	// Compute yr
 	mpz_neg(Temp, Lambda); // -lambda
-	mpz_mul(Temp, Temp, Pointer_Output_Point->X); // -lambda * xr
+	mpz_mul(Temp, Temp, Result_X); // -lambda * xr
 	mpz_mul(Result_Y, Lambda, Pointer_Point_P->X); // lambda * xp
 	mpz_add(Result_Y, Temp, Result_Y); // (-lambda * xr) + (lambda * xp)
 	mpz_sub(Result_Y, Result_Y, Pointer_Point_P->Y); // (-lambda * xr) + (lambda * xp) - yp
@@ -51,9 +51,15 @@ static inline void ECAdd(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P,
  * @param Pointer_Point_P The point to double.
  * @param Pointer_Output_Point Result.
  */
-static void ECDouble(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *Pointer_Output_Point)
+static inline void ECDouble(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *Pointer_Output_Point)
 {
 	mpz_t Lambda, Temp;
+	
+	if (Pointer_Point_P->Is_Infinite)
+	{
+		Pointer_Output_Point->Is_Infinite = 1;
+		return;
+	}	
 	
 	mpz_init(Lambda);
 	mpz_init(Temp);
@@ -66,9 +72,11 @@ static void ECDouble(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPo
 	
 	// Compute denominator
 	mpz_mul_ui(Temp, Pointer_Point_P->Y, 2);
+	// We can't compute integer division as it is not reliable, so invert denominator to compute a*b^-1 instead of a/b
+	mpz_invert(Temp, Temp, Pointer_Curve->p);
 	
-	mpz_fdiv_q(Lambda, Lambda, Temp);
-	
+	// Compute "division"
+	mpz_mul(Lambda, Lambda, Temp);
 	// Compute remainder to stay on Fp
 	mpz_mod(Lambda, Lambda, Pointer_Curve->p);
 	
@@ -76,9 +84,7 @@ static void ECDouble(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPo
 	ECAdd(Pointer_Curve, Pointer_Point_P, Pointer_Point_P, Lambda, Pointer_Output_Point);
 	
 	#ifdef DEBUG
-		gmp_printf("[ECDouble] Lambda = %Zd\n", Lambda);
-		gmp_printf("[ECDouble] Xr = %Zd\n", Pointer_Output_Point->X);
-		gmp_printf("[ECDouble] Yr = %Zd\n", Pointer_Output_Point->Y);
+		if (Pointer_Output_Point->Is_Infinite) printf("[ECDouble] Result is infinite\n");
 	#endif
 	
 	mpz_clear(Lambda);
@@ -91,7 +97,7 @@ static void ECDouble(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPo
  * @param Pointer_Point_Q Second point.
  * @param Pointer_Output_Point Result.
  */
-static void ECAddDifferentPoints(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *Pointer_Point_Q, TPoint *Pointer_Output_Point)
+static inline void ECAddDifferentPoints(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *Pointer_Point_Q, TPoint *Pointer_Output_Point)
 {
 	mpz_t Lambda, Temp;
 	
@@ -99,21 +105,21 @@ static void ECAddDifferentPoints(TEllipticCurve *Pointer_Curve, TPoint *Pointer_
 	mpz_init(Temp);
 	
 	// Compute lambda
+	// Compute numerator
 	mpz_sub(Lambda, Pointer_Point_P->Y, Pointer_Point_Q->Y); // yp - yq
-	mpz_sub(Temp, Pointer_Point_P->X, Pointer_Point_Q->X); // xp - xq
-	mpz_fdiv_q(Lambda, Lambda, Temp);
 	
+	// Compute denominator
+	mpz_sub(Temp, Pointer_Point_P->X, Pointer_Point_Q->X); // xp - xq
+	// We can't compute integer division as it is not reliable, so invert denominator to compute a*b^-1 instead of a/b
+	mpz_invert(Temp, Temp, Pointer_Curve->p);
+	
+	// Compute "division"
+	mpz_mul(Lambda, Lambda, Temp);
 	// Compute remainder to stay on Fp
 	mpz_mod(Lambda, Lambda, Pointer_Curve->p);
-	
+		
 	// Add the two points
 	ECAdd(Pointer_Curve, Pointer_Point_P, Pointer_Point_Q, Lambda, Pointer_Output_Point);
-	
-	#ifdef DEBUG
-		gmp_printf("[ECAddDifferentPoints] Lambda = %Zd\n", Lambda);
-		gmp_printf("[ECAddDifferentPoints] Xr = %Zd\n", Pointer_Output_Point->X);
-		gmp_printf("[ECAddDifferentPoints] Yr = %Zd\n", Pointer_Output_Point->Y);
-	#endif
 	
 	mpz_clear(Lambda);
 	mpz_clear(Temp);
@@ -180,9 +186,9 @@ void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *
 	if (Pointer_Point_P->Is_Infinite)
 	{
 		// Result is Q
-		PointCopy(Pointer_Output_Point, Pointer_Point_Q);
+		PointCopy(Pointer_Point_Q, Pointer_Output_Point);
 		#ifdef DEBUG
-			printf("[ECAddition] Point P is infinite\n");
+			printf("[ECAddition] P is infinite, returning Q\n");
 		#endif
 		return;
 	}
@@ -191,9 +197,9 @@ void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *
 	if (Pointer_Point_Q->Is_Infinite)
 	{
 		// Result is P
-		PointCopy(Pointer_Output_Point, Pointer_Point_P);
+		PointCopy(Pointer_Point_P, Pointer_Output_Point);
 		#ifdef DEBUG
-			printf("[ECAddition] Point Q is infinite\n");
+			printf("[ECAddition] Q is infinite, returning P\n");
 		#endif
 		return;
 	}
@@ -201,51 +207,46 @@ void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *
 	// Are P and Q opposite ?
 	PointCreate(0, 0, &Point_Temp);
 	ECOpposite(Pointer_Curve, Pointer_Point_Q, &Point_Temp);
+	
+	// Result is infinite
 	if (PointIsEqual(Pointer_Point_P, &Point_Temp))
 	{
-		// Result is infinite
 		Pointer_Output_Point->Is_Infinite = 1;
-		PointFree(&Point_Temp);
 		#ifdef DEBUG
-			printf("[ECAddition] P = -Q\n");
+			printf("[ECAddition] Result is infinite\n");
 		#endif
-		return;
 	}
-	
-	// Is P equal to Q ?
-	if (PointIsEqual(Pointer_Point_P, Pointer_Point_Q)) ECDouble(Pointer_Curve, Pointer_Point_P, Pointer_Output_Point); // Double the point
-	else ECAddDifferentPoints(Pointer_Curve, Pointer_Point_P, Pointer_Point_Q, Pointer_Output_Point); // Add the two different points
-	
-	Pointer_Output_Point->Is_Infinite = 0;
+	// Not infinite, choose correct adding function
+	else
+	{
+		// Is P equal to Q ?
+		if (PointIsEqual(Pointer_Point_P, Pointer_Point_Q)) ECDouble(Pointer_Curve, Pointer_Point_P, Pointer_Output_Point); // Double the point
+		else ECAddDifferentPoints(Pointer_Curve, Pointer_Point_P, Pointer_Point_Q, Pointer_Output_Point); // Add the two different points
+		Pointer_Output_Point->Is_Infinite = 0;
+		#ifdef DEBUG
+			printf("[ECAddition] Result : ");
+			PointShow(Pointer_Output_Point);
+		#endif
+	}
+	PointFree(&Point_Temp);
 }
 
-void ECMultiplication(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, mpz_t Factor, TPoint *Pointer_Output_Point)
+void ECMultiplication(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point, mpz_t Factor, TPoint *Pointer_Output_Point)
 {
-	static mpz_t Threshold;
+	int Bits_Count, i;
 	
-	mpz_init(Threshold);
+	Pointer_Output_Point->Is_Infinite = 1;
 	
-	// Get absolute value of Factor (it is possible because we don't need to keep track of a negative number as we are doing modulus calculations)
-	mpz_abs(Factor, Factor);
+	// Retrieve how many bits are used to store the factor number
+	Bits_Count = mpz_size(Factor) * mp_bits_per_limb;
 	
-	// Double the point as much as possible (until Threshold is greater than Factor)
-	mpz_set_ui(Threshold, 1);
-	PointCopy(Pointer_Point_P, Pointer_Output_Point);
-	while (mpz_cmp(Threshold, Factor) < 0)
+	// Double-and-add starting from most significant bit to minimize computations
+	for (i = Bits_Count - 1; i >= 0; i--)
 	{
+		// Always double the point
 		ECDouble(Pointer_Curve, Pointer_Output_Point, Pointer_Output_Point);
-		mpz_mul_ui(Threshold, Threshold, 2);
+		
+		// But add doubled values only when a factor bit is set
+		if (mpz_tstbit(Factor, i)) ECAddition(Pointer_Curve, Pointer_Output_Point, Pointer_Point, Pointer_Output_Point);
 	}
-	
-	// Adjust factor with doubled value
-	mpz_sub(Factor, Factor, Threshold);
-	
-	// Now add the point with itself
-	while (mpz_cmp_ui(Factor, 0) > 0)
-	{
-		ECAddition(Pointer_Curve, Pointer_Point_P, Pointer_Point_P, Pointer_Output_Point);
-		mpz_sub_ui(Factor, Factor, 1);
-	}
-	
-	mpz_clear(Threshold);
 }

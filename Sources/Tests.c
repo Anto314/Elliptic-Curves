@@ -5,15 +5,16 @@
 #include "Elliptic_Curves.h"
 #include "Point.h"
 
-static void Tests(void)
+int main(void)
 {
 	TEllipticCurve Curve;
 	TPoint A, B, C;
+	mpz_t Number;
 	
+	printf("--- TESTS ---\n");
 	
-	
-	//ECLoadFromFile("w256-001.gp", &Curve);
-	if (!ECLoadFromFile("test.gp", &Curve))
+	// Load curve
+	if (!ECLoadFromFile("../Curves/Test.gp", &Curve))
 	{
 		printf("Error : can't load curve file.\n");
 		return -1;
@@ -22,22 +23,45 @@ static void Tests(void)
 	PointCreate(3, 1, &A);
 	PointCreate(2, 4, &B);
 	PointCreate(0, 0, &C);
+	mpz_init(Number);
+	mpz_set_ui(Number, 54);
+	//mpz_set_str(Number, "12978522537291826747218973855244672319565387", 10);
+	
+
+		//TEST
+	/*	PointCreate(0, 1, &B);
+		ECAddition(&Curve, &B, &B, &C);
+		PointShow(&C);
+		return 0;*/
+		
+	// Test distinct points addition
+	/*printf("Adding 2 distinct points : (expected value is X = 4, Y = 2)\n");
+	ECAddition(&Curve, &A, &B, &C);
+	PointShow(&C);
+	// Check values
+	if ((mpz_cmp_ui(C.X, 4) != 0) || (mpz_cmp_ui(C.Y, 2) != 0))
+	{
+		printf("FAILED\n");
+		return 0;
+	}
+	printf("SUCCESS\n\n");
 	
 	// Test doubling
+	printf("Point doubling : (expected value is X = 2, Y = 1)\n");
 	ECAddition(&Curve, &B, &B, &C);
+	PointShow(&C);
+	// Check values
+	if ((mpz_cmp_ui(C.X, 2) != 0) || (mpz_cmp_ui(C.Y, 1) != 0))
+	{
+		printf("FAILED\n");
+		return 0;
+	}	
+	printf("SUCCESS\n\n");*/
 	
-	// Test different points addition
-	ECAddition(&Curve, &A, &B, &C);
+	// Test multiplying by a scalar
+	printf("Multiplying by a scalar : (expected value is X = , Y = )\n");
+	ECMultiplication(&Curve, &A, Number, &C);
+	PointShow(&C);
 	
-/*	PointDelete(&A);
-	PointDelete(&B);
-	PointDelete(&C);*/
-}
-
-int main(void)
-{
-	printf("--- TESTS ---\n");
-	
-	printf("Adding 2 distinct points : (expected value");
 	return 0;
 }

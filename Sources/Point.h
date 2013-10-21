@@ -43,4 +43,9 @@ void PointCopy(TPoint *Pointer_Source_Point, TPoint *Pointer_Destination_Point);
  */
 void PointShow(TPoint *Pointer_Point);
 
+/** Set a point coordinates to zero.
+ * @param Pointer_Point The point to reset.
+ */
+void PointClear(TPoint *Pointer_Point);
+
 #endif

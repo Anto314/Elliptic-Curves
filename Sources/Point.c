@@ -44,3 +44,10 @@ void PointShow(TPoint *Pointer_Point)
 	if (Pointer_Point->Is_Infinite) printf("Point is infinite.\n");
 	else gmp_printf("X = %Zd, Y = %Zd\n", Pointer_Point->X, Pointer_Point->Y);
 }
+
+void PointClear(TPoint *Pointer_Point)
+{
+	mpz_set_ui(Pointer_Point->X, 0);
+	mpz_set_ui(Pointer_Point->Y, 0);
+	Pointer_Point->Is_Infinite = 0;
+}

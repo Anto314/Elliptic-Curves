@@ -6,10 +6,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <time.h>
 #include "Elliptic_Curves.h"
 #include "Network.h"
 #include "Point.h"
+#include "Utils.h"
 
 static void DiffieHellmanAlice(TEllipticCurve *Pointer_Curve, int Socket_Bob)
 {
@@ -18,7 +18,7 @@ static void DiffieHellmanAlice(TEllipticCurve *Pointer_Curve, int Socket_Bob)
 	TPoint Point_Temp, Point_Received;
 	
 	gmp_randinit_default(Random_State);
-	gmp_randseed_ui(Random_State, (unsigned long int) time(NULL));
+	gmp_randseed_ui(Random_State, UtilsGenerateRandomSeed());
 	
 	// Choose a random number
 	printf("1. Choosing a random private key 'a' :\n");
@@ -55,7 +55,7 @@ static void DiffieHellmanBob(TEllipticCurve *Pointer_Curve, int Socket_Alice)
 	TPoint Point_Temp, Point_Received;
 	
 	gmp_randinit_default(Random_State);
-	gmp_randseed_ui(Random_State, (unsigned long int) time(NULL));
+	gmp_randseed_ui(Random_State, UtilsGenerateRandomSeed());
 	
 	// Choose a random number
 	printf("1. Choosing a random private key 'b' :\n");

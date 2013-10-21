@@ -98,8 +98,6 @@ void NetworkReceiveMPZ(int Socket_Source, mpz_t Number)
 	// Receive string
 	read(Socket_Source, String, Length);
 	mpz_set_str(Number, String, 10);
-	
-	gmp_printf("siz : %d rece : %Zd\n", Length, Number);
 }
 
 void NetworkSendPoint(int Socket_Destination, TPoint *Pointer_Point)
