@@ -15,14 +15,13 @@ OBJECTS_ELGAMAL = $(OBJECTS_DIR)/ElGamal.o
 
 LIBRARIES = -lgmp
 
-#$(OBJECTS_ELGAMAL)
-all: $(OBJECTS_SHARED) $(OBJECTS_TESTS) $(OBJECTS_DIFFIE_HELLMAN) 
+all: $(OBJECTS_SHARED) $(OBJECTS_TESTS) $(OBJECTS_DIFFIE_HELLMAN) $(OBJECTS_ELGAMAL)
 	@# Compile tests
 	$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_TESTS) -o $(BINARIES_DIR)/Tests $(LIBRARIES)
 	@# Compile classic Diffie-Hellman algorithm
 	$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_DIFFIE_HELLMAN) -o $(BINARIES_DIR)/Diffie_Hellman $(LIBRARIES)
 	@# Compile ElGamal
-	#$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_ELGAMAL) -o $(BINARIES_DIR)/ElGamal $(LIBRARIES)
+	$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_ELGAMAL) -o $(BINARIES_DIR)/ElGamal $(LIBRARIES)
 
 release: CCFLAGS = -W -Wall -O3 -fexpensive-optimizations -ffast-math -Wl,--strip-all
 release: all

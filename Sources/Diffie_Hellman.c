@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 			ECFree(&Curve);
 			return -5;
 		}
-		printf("Bob is connected.\n");
+		printf("Bob is connected.\n\n");
 		
 		// Exchange keys
 		DiffieHellmanAlice(&Curve, Socket_Bob);
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 			ECFree(&Curve);
 			return 0;
 		}
-		printf("Connected to Alice.\n");
+		printf("Connected to Alice.\n\n");
 		
 		// Exchange keys
 		DiffieHellmanBob(&Curve, Socket_Alice);
