@@ -14,17 +14,12 @@
 static void DiffieHellmanAlice(TEllipticCurve *Pointer_Curve, int Socket_Bob)
 {
 	mpz_t Private_Key;
-	static gmp_randstate_t Random_State;
 	TPoint Point_Temp, Point_Received;
-	
-	gmp_randinit_default(Random_State);
-	gmp_randseed_ui(Random_State, UtilsGenerateRandomSeed());
 	
 	// Choose a random number
 	printf("1. Choosing a random private key 'a' :\n");
 	mpz_init(Private_Key);
-	mpz_urandomm(Private_Key, Random_State, Pointer_Curve->p); // Choose a number modulus the order of the curve
-	//mpz_set_ui(Private_Key, 2);
+	UtilsGenerateRandomNumber(Pointer_Curve->p, Private_Key); // Choose a number modulus the order of the curve
 	gmp_printf("a = %Zd\n\n", Private_Key);
 	
 	// Receive Bob's part of the key (so Bob can send it when he wants)
@@ -51,17 +46,12 @@ static void DiffieHellmanAlice(TEllipticCurve *Pointer_Curve, int Socket_Bob)
 static void DiffieHellmanBob(TEllipticCurve *Pointer_Curve, int Socket_Alice)
 {
 	mpz_t Private_Key;
-	static gmp_randstate_t Random_State;
 	TPoint Point_Temp, Point_Received;
-	
-	gmp_randinit_default(Random_State);
-	gmp_randseed_ui(Random_State, UtilsGenerateRandomSeed());
 	
 	// Choose a random number
 	printf("1. Choosing a random private key 'b' :\n");
 	mpz_init(Private_Key);
-	mpz_urandomm(Private_Key, Random_State, Pointer_Curve->p); // Choose a number modulus the order of the curve
-	//mpz_set_ui(Private_Key, 4);
+	UtilsGenerateRandomNumber(Pointer_Curve->p, Private_Key); // Choose a number modulus the order of the curve
 	gmp_printf("b = %Zd\n\n", Private_Key);
 	
 	// Compute b.G
@@ -122,6 +112,8 @@ int main(int argc, char *argv[])
 		printf("Error : can't load curve file.\n");
 		return -3;
 	}
+	
+	UtilsInitializeRandomGenerator();
 	
 	// Alice
 	if (Is_Alice)

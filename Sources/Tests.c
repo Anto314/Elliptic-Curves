@@ -24,18 +24,11 @@ int main(void)
 	PointCreate(2, 4, &B);
 	PointCreate(0, 0, &C);
 	mpz_init(Number);
-	mpz_set_ui(Number, 54);
+	mpz_set_ui(Number, 53);
 	//mpz_set_str(Number, "12978522537291826747218973855244672319565387", 10);
 	
-
-		//TEST
-	/*	PointCreate(0, 1, &B);
-		ECAddition(&Curve, &B, &B, &C);
-		PointShow(&C);
-		return 0;*/
-		
 	// Test distinct points addition
-	/*printf("Adding 2 distinct points : (expected value is X = 4, Y = 2)\n");
+	printf("Adding 2 distinct points : (expected value is X = 4, Y = 2)\n");
 	ECAddition(&Curve, &A, &B, &C);
 	PointShow(&C);
 	// Check values
@@ -56,12 +49,19 @@ int main(void)
 		printf("FAILED\n");
 		return 0;
 	}	
-	printf("SUCCESS\n\n");*/
+	printf("SUCCESS\n\n");
 	
 	// Test multiplying by a scalar
-	printf("Multiplying by a scalar : (expected value is X = , Y = )\n");
+	printf("Multiplying by a scalar : (expected value is X = 3, Y = 4)\n");
 	ECMultiplication(&Curve, &A, Number, &C);
 	PointShow(&C);
+	// Check values
+	if ((mpz_cmp_ui(C.X, 3) != 0) || (mpz_cmp_ui(C.Y, 4) != 0))
+	{
+		printf("FAILED\n");
+		return 0;
+	}	
+	printf("SUCCESS\n\n");
 	
 	return 0;
 }
