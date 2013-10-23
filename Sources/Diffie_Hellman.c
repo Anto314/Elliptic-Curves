@@ -11,68 +11,80 @@
 #include "Point.h"
 #include "Utils.h"
 
-static void DiffieHellmanAlice(TEllipticCurve *Pointer_Curve, int Socket_Bob)
+/** Server part of the Diffie-Hellman key exchanging.
+ * @param Pointer_Curve The curve used to make calculations.
+ * @param Socket_Bob Client's socket.
+ * @param Private_Key On output, hold the private key.
+ * @param Pointer_Output_Point On output, hold the shared key.
+ */
+static void DiffieHellmanAlice(TEllipticCurve *Pointer_Curve, int Socket_Bob, mpz_t Private_Key, TPoint *Pointer_Output_Point)
 {
-	mpz_t Private_Key;
-	TPoint Point_Temp, Point_Received;
+	TPoint Point_Temp;
+
+	// Initialize variables
+	PointCreate(0, 0, &Point_Temp);
 	
 	// Choose a random number
-	printf("1. Choosing a random private key 'a' :\n");
-	mpz_init(Private_Key);
+	printf("Choosing a random private key 'a'...\n");
 	UtilsGenerateRandomNumber(Pointer_Curve->p, Private_Key); // Choose a number modulus the order of the curve
 	gmp_printf("a = %Zd\n\n", Private_Key);
 	
 	// Receive Bob's part of the key (so Bob can send it when he wants)
-	printf("2. Receiving b.G from Bob\n");
-	PointCreate(0, 0, &Point_Received);
-	NetworkReceivePoint(Socket_Bob, &Point_Received);
-	gmp_printf("b.G = (%Zd, %Zd)\n\n", Point_Received.X, Point_Received.Y);
+	printf("Receiving b.G from Bob...\n");
+	NetworkReceivePoint(Socket_Bob, Pointer_Output_Point);
+	PointShow(Pointer_Output_Point);
 	
 	// Compute a.G
-	printf("3. Sending a.G to Bob: \n");
-	PointCreate(0, 0, &Point_Temp);
+	printf("Sending a.G to Bob...\n");
 	ECMultiplication(Pointer_Curve, &Pointer_Curve->Point_Generator, Private_Key, &Point_Temp);
 	NetworkSendPoint(Socket_Bob, &Point_Temp);
-	gmp_printf("a.G = (%Zd, %Zd)\n\n", Point_Temp.X, Point_Temp.Y);
+	PointShow(&Point_Temp);
 	
-	// Add 'a' to b.G
-	ECMultiplication(Pointer_Curve, &Point_Received, Private_Key, &Point_Temp);
-	gmp_printf("Key a.b.G : (%Zd, %Zd)\n",  Point_Temp.X, Point_Temp.Y);
+	// Multiply 'a' to b.G
+	ECMultiplication(Pointer_Curve, Pointer_Output_Point, Private_Key, Pointer_Output_Point);
+	PointShow(Pointer_Output_Point);
 	
+	// Free resources
 	PointFree(&Point_Temp);
-	PointFree(&Point_Received);
 }
 
-static void DiffieHellmanBob(TEllipticCurve *Pointer_Curve, int Socket_Alice)
+/** Client part of the Diffie-Hellman key exchanging.
+ * @param Pointer_Curve The curve used to make calculations.
+ * @param Socket_Bob Server's socket.
+ * @param Private_Key On output, hold the private key.
+ * @param Pointer_Output_Point On output, hold the shared key.
+ */
+static void DiffieHellmanBob(TEllipticCurve *Pointer_Curve, int Socket_Alice, mpz_t Private_Key, TPoint *Pointer_Output_Point)
 {
-	mpz_t Private_Key;
-	TPoint Point_Temp, Point_Received;
+	TPoint Point_Temp;
+	
+	// Initialize variables
+	PointCreate(0, 0, &Point_Temp);
 	
 	// Choose a random number
-	printf("1. Choosing a random private key 'b' :\n");
-	mpz_init(Private_Key);
+	printf("Choosing a random private key 'b'...\n");
 	UtilsGenerateRandomNumber(Pointer_Curve->p, Private_Key); // Choose a number modulus the order of the curve
 	gmp_printf("b = %Zd\n\n", Private_Key);
 	
 	// Compute b.G
-	printf("2. Sending b.G to Alice: \n");
-	PointCreate(0, 0, &Point_Temp);
+	printf("Sending b.G to Alice...\n");
 	ECMultiplication(Pointer_Curve, &Pointer_Curve->Point_Generator, Private_Key, &Point_Temp);
 	NetworkSendPoint(Socket_Alice, &Point_Temp);
-	gmp_printf("b.G = (%Zd, %Zd)\n\n", Point_Temp.X, Point_Temp.Y);
+	PointShow(&Point_Temp);
+	putchar('\n');
 	
 	// Receive Alice's part of the key
-	printf("3. Receiving a.G from Alice\n");
-	PointCreate(0, 0, &Point_Received);
-	NetworkReceivePoint(Socket_Alice, &Point_Received);
-	gmp_printf("a.G = (%Zd, %Zd)\n\n", Point_Received.X, Point_Received.Y);
+	printf("Receiving a.G from Alice...\n");
+	NetworkReceivePoint(Socket_Alice, Pointer_Output_Point);
+	PointShow(Pointer_Output_Point);
+	putchar('\n');
 	
-	// Add 'a' to b.G
-	ECMultiplication(Pointer_Curve, &Point_Received, Private_Key, &Point_Temp);
-	gmp_printf("Key b.a.G : (%Zd, %Zd)\n",  Point_Temp.X, Point_Temp.Y);
+	// Multiply 'a' to b.G
+	ECMultiplication(Pointer_Curve, Pointer_Output_Point, Private_Key, Pointer_Output_Point);
+	PointShow(Pointer_Output_Point);
 	
+	// Free resources
 	PointFree(&Point_Temp);
-	PointFree(&Point_Received);
 }
 
 int main(int argc, char *argv[])
@@ -81,6 +93,8 @@ int main(int argc, char *argv[])
 	unsigned short Port;
 	TEllipticCurve Curve;
 	int Socket_Alice, Socket_Bob;
+	mpz_t Private_Key;
+	TPoint Point_Shared_Key;
 	
 	// Check parameters
 	if (argc != 5)
@@ -115,6 +129,10 @@ int main(int argc, char *argv[])
 	
 	UtilsInitializeRandomGenerator();
 	
+	// Initialize variables
+	PointCreate(0, 0, &Point_Shared_Key);
+	mpz_init(Private_Key);
+	
 	// Alice
 	if (Is_Alice)
 	{
@@ -141,7 +159,7 @@ int main(int argc, char *argv[])
 		printf("Bob is connected.\n\n");
 		
 		// Exchange keys
-		DiffieHellmanAlice(&Curve, Socket_Bob);
+		DiffieHellmanAlice(&Curve, Socket_Bob, Private_Key, &Point_Shared_Key);
 		
 		close(Socket_Bob);
 	}
@@ -159,10 +177,11 @@ int main(int argc, char *argv[])
 		printf("Connected to Alice.\n\n");
 		
 		// Exchange keys
-		DiffieHellmanBob(&Curve, Socket_Alice);
+		DiffieHellmanBob(&Curve, Socket_Alice, Private_Key, &Point_Shared_Key);
 	}
 	
 	close(Socket_Alice);
+	PointFree(&Point_Shared_Key);
 	ECFree(&Curve);
 	return 0;
 }

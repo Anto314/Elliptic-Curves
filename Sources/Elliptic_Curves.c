@@ -234,6 +234,11 @@ void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *
 void ECMultiplication(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point, mpz_t Factor, TPoint *Pointer_Output_Point)
 {
 	int Bits_Count, i;
+	TPoint Point_Temp;
+	
+	// Initialize variables
+	PointCreate(0, 0, &Point_Temp);
+	PointCopy(Pointer_Point, &Point_Temp); // Allow using the same variable for Pointer_Point and Pointer_Output_Point
 	
 	Pointer_Output_Point->Is_Infinite = 1;
 	
@@ -247,6 +252,9 @@ void ECMultiplication(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point, mpz_
 		ECDouble(Pointer_Curve, Pointer_Output_Point, Pointer_Output_Point);
 		
 		// But add doubled values only when a factor bit is set
-		if (mpz_tstbit(Factor, i)) ECAddition(Pointer_Curve, Pointer_Output_Point, Pointer_Point, Pointer_Output_Point);
+		if (mpz_tstbit(Factor, i)) ECAddition(Pointer_Curve, Pointer_Output_Point, &Point_Temp, Pointer_Output_Point);
 	}
+	
+	// Free resources
+	PointClear(&Point_Temp);
 }

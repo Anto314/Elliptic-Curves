@@ -48,7 +48,7 @@ void ECOpposite(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Input_Point, TPoi
  * @param Pointer_Curve The elliptic curve used for addition.
  * @param Pointer_Point_P First operand.
  * @param Pointer_Point_Q Second operand.
- * @param Pointer_Output_Point Result (the point must be created by the user and must not be P or Q).
+ * @param Pointer_Output_Point Result (the point must be created by the user).
  */
 void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *Pointer_Point_Q, TPoint *Pointer_Output_Point);
 
@@ -56,7 +56,7 @@ void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *
  * @param Pointer_Curve The elliptic curve used for multiplication.
  * @param Pointer_Point The point to multiply.
  * @param Factor The scalar value to multiply the point with.
- * @param Pointer_Output_Point The result (il must be created by the user and must not be P).
+ * @param Pointer_Output_Point The result (il must be created by the user).
  */
 void ECMultiplication(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point, mpz_t Factor, TPoint *Pointer_Output_Point);
 

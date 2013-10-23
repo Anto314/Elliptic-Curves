@@ -64,7 +64,7 @@ static void ElGamalAlice(TEllipticCurve *Pointer_Curve, mpz_t Private_Key, int S
 	mpz_clear(Message);
 }
 
-static void ElGamalBob(TEllipticCurve *Pointer_Curve, mpz_t Private_Key, int Socket_Alice)
+static void ElGamalBob(TEllipticCurve *Pointer_Curve, int Socket_Alice)
 {
 	TPoint Point_Alice_Public_Key, Point_Temp;
 	mpz_t Number_K, Message, Number_Temp;
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 	unsigned short Port;
 	TEllipticCurve Curve;
 	int Socket_Alice, Socket_Bob;
-	mpz_t Private_Key_Alice, Private_Key_Bob;
+	mpz_t Private_Key_Alice;
 	
 	// Check parameters
 	if (argc != 5)
@@ -199,25 +199,17 @@ int main(int argc, char *argv[])
 	// Bob
 	else
 	{
-		// Generate Bob's private key once
-		mpz_init(Private_Key_Bob);
-		UtilsGenerateRandomNumber(Curve.p, Private_Key_Bob);
-		
 		// Connect to server
 		Socket_Alice = NetworkClientConnect(String_Parameter_IP_Address, Port);
 		if (Socket_Alice < 0)
 		{
 			printf("Error : could not connect to server.\n");
 			ECFree(&Curve);
-			mpz_clear(Private_Key_Bob);
 			return 0;
 		}
 		printf("Connected to Alice.\n\n");
 		
-		ElGamalBob(&Curve, Private_Key_Bob, Socket_Alice);
-		
-		// Free allocated resources
-		mpz_clear(Private_Key_Bob);
+		ElGamalBob(&Curve, Socket_Alice);
 	}
 	
 	close(Socket_Alice);

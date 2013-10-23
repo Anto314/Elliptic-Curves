@@ -12,16 +12,20 @@ OBJECTS_SHARED = $(OBJECTS_DIR)/Elliptic_Curves.o $(OBJECTS_DIR)/Point.o $(OBJEC
 OBJECTS_TESTS = $(OBJECTS_DIR)/Tests.o
 OBJECTS_DIFFIE_HELLMAN = $(OBJECTS_DIR)/Diffie_Hellman.o
 OBJECTS_ELGAMAL = $(OBJECTS_DIR)/ElGamal.o
+OBJECTS_DSA = $(OBJECTS_DIR)/DSA.o
 
-LIBRARIES = -lgmp
+LIBRARIES = -lgmp -lssl
 
-all: $(OBJECTS_SHARED) $(OBJECTS_TESTS) $(OBJECTS_DIFFIE_HELLMAN) $(OBJECTS_ELGAMAL)
+#$(OBJECTS_DSA)
+all: $(OBJECTS_SHARED) $(OBJECTS_TESTS) $(OBJECTS_DIFFIE_HELLMAN) $(OBJECTS_ELGAMAL) 
 	@# Compile tests
 	$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_TESTS) -o $(BINARIES_DIR)/Tests $(LIBRARIES)
 	@# Compile classic Diffie-Hellman algorithm
 	$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_DIFFIE_HELLMAN) -o $(BINARIES_DIR)/Diffie_Hellman $(LIBRARIES)
 	@# Compile ElGamal
 	$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_ELGAMAL) -o $(BINARIES_DIR)/ElGamal $(LIBRARIES)
+	@# Compile DSA
+	#$(CC) $(CCFLAGS) $(OBJECTS_SHARED) $(OBJECTS_DSA) -o $(BINARIES_DIR)/DSA $(LIBRARIES)
 
 release: CCFLAGS = -W -Wall -O3 -fexpensive-optimizations -ffast-math -Wl,--strip-all
 release: all
@@ -58,6 +62,12 @@ $(OBJECTS_DIR)/Diffie_Hellman.o: $(SOURCES_DIR)/Diffie_Hellman.c $(DEPENDENCIES_
 #---------------------------------------------------------------------------------------------------------------------------------------------------
 $(OBJECTS_DIR)/ElGamal.o: $(SOURCES_DIR)/ElGamal.c $(DEPENDENCIES_SHARED)
 	$(CC) $(CCFLAGS) -c $(SOURCES_DIR)/ElGamal.c -o $(OBJECTS_DIR)/ElGamal.o
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------
+# DSA signature
+#---------------------------------------------------------------------------------------------------------------------------------------------------
+$(OBJECTS_DIR)/DSA.o: $(SOURCES_DIR)/DSA.c $(DEPENDENCIES_SHARED)
+	$(CC) $(CCFLAGS) -c $(SOURCES_DIR)/DSA.c -o $(OBJECTS_DIR)/DSA.o
 
 clean:
 	rm -f $(OBJECTS_DIR)/* $(BINARIES_DIR)/*
