@@ -24,6 +24,14 @@ static int IsNumberInBounds(mpz_t Number, mpz_t Number_Order)
 	return 1;
 }
 
+/** Sign a message.
+ * @param Pointer_Curve The curve used for calculations.
+ * @param Pointer_Message The message to sign.
+ * @param Message_Length Size of the message in bytes.
+ * @param Private_Key_Alice Alice's private key.
+ * @param Output_Number_U On output, contain the generated signature 'u' number.
+ * @param Output_Number_V On output, contain the generated signature 'v' number.
+ */
 static void DSAAlice(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Message, size_t Message_Length, mpz_t Private_Key_Alice, mpz_t Output_Number_U, mpz_t Output_Number_V)
 {
 	unsigned char Buffer_Hash[UTILS_HASH_LENGTH];
@@ -39,7 +47,7 @@ static void DSAAlice(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Messa
 	// Compute message hash
 	printf("Alice is computing message hash...\n");
 	UtilsComputeHash(Pointer_Message, Message_Length, Buffer_Hash);
-	mpz_set_str(Number_Hash, (char *) Buffer_Hash, 10);
+	mpz_set_str(Number_Hash, (char *) Buffer_Hash, 16);
 	UtilsShowHash(Buffer_Hash);
 	putchar('\n');
 	
@@ -81,6 +89,15 @@ static void DSAAlice(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Messa
 	PointFree(&Point);
 }
 
+/** Check a message signature.
+ * @param Pointer_Curve The curve used for calculations.
+ * @param Pointer_Message The message to check.
+ * @param Message_Length Size of message in bytes.
+ * @param Pointer_Public_Key_Alice Alice's public key.
+ * @param Number_U The signature 'u' number.
+ * @param Number_V The signature 'v' number.
+ * @return 0 if the signature is bad or 1 if there is a signature match.
+ */
 static int DSABob(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Message, size_t Message_Length, TPoint *Pointer_Public_Key_Alice, mpz_t Number_U, mpz_t Number_V)
 {
 	unsigned char Buffer_Hash[UTILS_HASH_LENGTH];
@@ -132,7 +149,7 @@ static int DSABob(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Message,
 	// Compute message hash
 	printf("Bob is computing message hash...\n");
 	UtilsComputeHash(Pointer_Message, Message_Length, Buffer_Hash);
-	mpz_set_str(Number_Hash, (char *) Buffer_Hash, 10);
+	mpz_set_str(Number_Hash, (char *) Buffer_Hash, 16);
 	UtilsShowHash(Buffer_Hash);
 	putchar('\n');
 	

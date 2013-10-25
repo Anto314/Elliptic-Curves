@@ -33,16 +33,17 @@ static void DiffieHellmanAlice(TEllipticCurve *Pointer_Curve, int Socket_Bob, mp
 	printf("Receiving b.G from Bob...\n");
 	NetworkReceivePoint(Socket_Bob, Pointer_Output_Point);
 	PointShow(Pointer_Output_Point);
+	putchar('\n');
 	
 	// Compute a.G
 	printf("Sending a.G to Bob...\n");
 	ECMultiplication(Pointer_Curve, &Pointer_Curve->Point_Generator, Private_Key, &Point_Temp);
 	NetworkSendPoint(Socket_Bob, &Point_Temp);
 	PointShow(&Point_Temp);
+	putchar('\n');
 	
 	// Multiply 'a' to b.G
 	ECMultiplication(Pointer_Curve, Pointer_Output_Point, Private_Key, Pointer_Output_Point);
-	PointShow(Pointer_Output_Point);
 	
 	// Free resources
 	PointFree(&Point_Temp);
@@ -81,8 +82,7 @@ static void DiffieHellmanBob(TEllipticCurve *Pointer_Curve, int Socket_Alice, mp
 	
 	// Multiply 'a' to b.G
 	ECMultiplication(Pointer_Curve, Pointer_Output_Point, Private_Key, Pointer_Output_Point);
-	PointShow(Pointer_Output_Point);
-	
+		
 	// Free resources
 	PointFree(&Point_Temp);
 }
@@ -180,6 +180,11 @@ int main(int argc, char *argv[])
 		DiffieHellmanBob(&Curve, Socket_Alice, Private_Key, &Point_Shared_Key);
 	}
 	
+	// Show the shared secret
+	printf("Shared secret is :\n");
+	PointShow(&Point_Shared_Key);
+	
+	// Free resources
 	close(Socket_Alice);
 	PointFree(&Point_Shared_Key);
 	ECFree(&Curve);
