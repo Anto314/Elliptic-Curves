@@ -60,4 +60,11 @@ void ECAddition(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point_P, TPoint *
  */
 void ECMultiplication(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point, mpz_t Factor, TPoint *Pointer_Output_Point);
 
+/** Tell if a point lies on a curve or not.
+ * @param Pointer_Curve The elliptic curve.
+ * @param Pointer_Point The point to check.
+ * @return 1 if the point lies on the curve or 0 otherwise.
+ */
+int ECIsPointOnCurve(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point);
+
 #endif

@@ -258,3 +258,34 @@ void ECMultiplication(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point, mpz_
 	// Free resources
 	PointClear(&Point_Temp);
 }
+
+// To check if the point lies on the curve we check if it can be replaced in the curve equation y^2 = x^3 + a4.x + a6
+int ECIsPointOnCurve(TEllipticCurve *Pointer_Curve, TPoint *Pointer_Point)
+{
+	mpz_t Number_Temp, Number_Temp_2;
+	int Return_Value;
+	
+	// Initialize variables
+	mpz_init(Number_Temp);
+	mpz_init(Number_Temp_2);
+	
+	// Compute right part of the equation
+	mpz_powm_ui(Number_Temp, Pointer_Point->X, 3, Pointer_Curve->p); // x^3
+	mpz_mul(Number_Temp_2, Pointer_Curve->a4, Pointer_Point->X); // a4.x
+	mpz_add(Number_Temp, Number_Temp, Number_Temp_2); // x^3 + a4.x
+	mpz_add(Number_Temp, Number_Temp, Pointer_Curve->a6); // x^3 + a4.x + a6
+	mpz_mod(Number_Temp, Number_Temp, Pointer_Curve->p);
+	
+	// Compute left part of the equation
+	mpz_mul(Number_Temp_2, Pointer_Point->Y, Pointer_Point->Y);
+	mpz_mod(Number_Temp_2, Number_Temp_2, Pointer_Curve->p);
+	
+	// Are the two parts equal (modulo p) ?
+	if (mpz_cmp(Number_Temp_2, Number_Temp) == 0) Return_Value = 1;
+	else Return_Value = 0;
+	
+	// Free resources
+	mpz_clear(Number_Temp);
+	mpz_clear(Number_Temp_2);
+	return Return_Value;
+}

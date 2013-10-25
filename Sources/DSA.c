@@ -103,7 +103,7 @@ static int DSABob(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Message,
 	unsigned char Buffer_Hash[UTILS_HASH_LENGTH];
 	mpz_t Number_Hash, Number_Temp;
 	TPoint Point_Temp, Point_Temp_2;
-	int Return_Value;
+	int Return_Value = 0;
 	
 	// Initialize variables
 	mpz_init(Number_Hash);
@@ -119,21 +119,21 @@ static int DSABob(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Message,
 	if (!IsNumberInBounds(Number_U, Pointer_Curve->n))
 	{
 		printf("\nError : 'u' is not in [1; n - 1].\n");
-		return 0;
+		goto Exit;
 	}
 
 	// 'v' must be between 1 and n - 1)
 	if (!IsNumberInBounds(Number_V, Pointer_Curve->n))
 	{
 		printf("\nError : 'v' is not in [1; n - 1].\n");
-		return 0;
+		goto Exit;
 	}
 	
 	// Alice's public key (Q) must not be equal to (0, 0)
 	if (Pointer_Public_Key_Alice->Is_Infinite)
 	{
 		printf("\nError : Alice's public key is equal to (0, 0).\n");
-		return 0;
+		goto Exit;
 	}
 	
 	// n * Q must be equal to (0, 0)
@@ -142,7 +142,14 @@ static int DSABob(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Message,
 	{
 		printf("\nError : n.Q != (0, 0).\n");
 		PointShow(&Point_Temp);
-		return 0;
+		goto Exit;
+	}
+	
+	// Check if Q lies on the curve
+	if (!ECIsPointOnCurve(Pointer_Curve, Pointer_Public_Key_Alice))
+	{
+		printf("\nError : Q is not a point of the curve.\n");
+		goto Exit;
 	}
 	printf("done.\n\n");
 	
@@ -180,14 +187,11 @@ static int DSABob(TEllipticCurve *Pointer_Curve, unsigned char *Pointer_Message,
 		printf("\033[32mSUCCESS : signature matched.\n");
 		Return_Value = 1;
 	}
-	else
-	{
-		printf("\033[31mFAILURE : bad signature.\n");
-		Return_Value = 0;
-	}
+	else printf("\033[31mFAILURE : bad signature.\n");
 	// Reset color attributes
 	printf("\033[0m");
 	
+Exit:
 	// Free resources
 	mpz_clear(Number_Hash);
 	mpz_clear(Number_Temp);
